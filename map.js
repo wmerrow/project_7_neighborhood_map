@@ -17,29 +17,37 @@
 // //    viewModel.shouldShowMessage(true); // ... now it's visible again
 // ko.applyBindings(new viewModel());
 
+// MODEL
 
 function Location(data) {
     this.name = data.name;
     this.burrito = data.burrito;
-    // this.position = data.position;
+    this.location = data.location;
 }
 
-var testLocations = [
-          {name: 'Park Ave Penthouse', burrito: '1'},
-          {name: 'Chelsea Loft', burrito: '0'},
-          {name: 'Union Square Open Floor Plan', burrito: '1'}
+var locations = [
+          {name: 'Park Ave Penthouse', burrito: '1', location: {lat: 38.916767, lng: -77.005899}},
+          {name: 'Chelsea Loft', burrito: '0', location: {lat: 38.926767, lng: -77.015899}},
+          {name: 'Union Square Open Floor Plan', burrito: '1', location: {lat: 38.906767, lng: -77.035899}}
           ];
 
-/// empty array for location info
-var testArray = [];
+// /// empty array for location info
+// var testArray = [];
 
-/// add locations items to array
-for (var i=0; i<testLocations.length; i++) {
-          var testLoc = new Location(testLocations[i]);
-          /// Push to array
-          testArray.push(testLoc);
-}
+// /// add locations items to array
+// for (var i=0; i<locations.length; i++) {
+//           var loc = new Location(locations[i]);
+//           /// Push to array
+//           testArray.push(loc);
+// }
 
+// VIEWMODEL
+
+      var map;
+
+      var markers = [];
+
+      function initMap() {
 
 function ViewModel() {
     var self = this;
@@ -48,7 +56,7 @@ function ViewModel() {
 
     // creates an observable array of the data
     self.locations = ko.observableArray([]);
-    self.locations(testArray)
+    self.locations(locations) /// this used to pass in testArray instead of locations - but it seems like testArray is an unnecessary step
 
     // gets called by the foreach binding on list div
     self.filterLocations = ko.computed(function () {
@@ -67,27 +75,18 @@ function ViewModel() {
         self.currentFilter(burrito);
     }
 
-
-
-
+    self.listClick = function(location) {
+      console.log(location.marker);
+      toggleWindow(location.marker);
+      //console.log(location);
+    };
 
 }
 
-ko.applyBindings(new ViewModel())
+var vm = new ViewModel();
+ko.applyBindings(vm);
 
 
-
-
-
-
-
-
-
-      var map;
-
-			var markers = [];
-
-			function initMap() {
 
 			var styles = [
           {
@@ -162,37 +161,37 @@ ko.applyBindings(new ViewModel())
 					styles: styles
 				});
 
-        var locations = [
-          {title: 'Park Ave Penthouse', location: {lat: 38.916767, lng: -77.005899}},
-          {title: 'Chelsea Loft', location: {lat: 38.926767, lng: -77.015899}},
-          {title: 'Union Square Open Floor Plan', location: {lat: 38.906767, lng: -77.035899}}
-          //,
-          // {title: 'East Village Hip Studio', location: {lat: 38.916767, lng: -77.005899}},
-          // {title: 'TriBeCa Artsy Bachelor Pad', location: {lat: 38.816767, lng: -77.005899}},
-          // {title: 'Chinatown Homey Space', location: {lat: 38.916767, lng: -77.005899}},
-          // {title: 'Park Ave Penthouse', location: {lat: 38.916767, lng: -77.005899}},
-          // {title: 'Chelsea Loft', location: {lat: 38.926767, lng: -77.015899}},
-          // {title: 'Union Square Open Floor Plan', location: {lat: 38.906767, lng: -77.035899}},
-          // {title: 'East Village Hip Studio', location: {lat: 38.916767, lng: -77.005899}},
-          // {title: 'TriBeCa Artsy Bachelor Pad', location: {lat: 38.816767, lng: -77.005899}},
-          // {title: 'Chinatown Homey Space', location: {lat: 38.916767, lng: -77.005899}}
-        ];
+        //OLD LOCATIONS - PROB SHOULD DELETE
+        // var locations = [
+        //   {title: 'Park Ave Penthouse', location: {lat: 38.916767, lng: -77.005899}},
+        //   {title: 'Chelsea Loft', location: {lat: 38.926767, lng: -77.015899}},
+        //   {title: 'Union Square Open Floor Plan', location: {lat: 38.906767, lng: -77.035899}}
+        //   //,
+        //   // {title: 'East Village Hip Studio', location: {lat: 38.916767, lng: -77.005899}},
+        //   // {title: 'TriBeCa Artsy Bachelor Pad', location: {lat: 38.816767, lng: -77.005899}},
+        //   // {title: 'Chinatown Homey Space', location: {lat: 38.916767, lng: -77.005899}},
+        //   // {title: 'Park Ave Penthouse', location: {lat: 38.916767, lng: -77.005899}},
+        //   // {title: 'Chelsea Loft', location: {lat: 38.926767, lng: -77.015899}},
+        //   // {title: 'Union Square Open Floor Plan', location: {lat: 38.906767, lng: -77.035899}},
+        //   // {title: 'East Village Hip Studio', location: {lat: 38.916767, lng: -77.005899}},
+        //   // {title: 'TriBeCa Artsy Bachelor Pad', location: {lat: 38.816767, lng: -77.005899}},
+        //   // {title: 'Chinatown Homey Space', location: {lat: 38.916767, lng: -77.005899}}
+        // ];
 
         var largeInfowindow = new google.maps.InfoWindow();
 
-        // Style the markers a bit. This will be our listing marker icon.
         var defaultIcon = makeMarkerIcon('e85113');
+        // // Create a "highlighted location" marker color for when the user
+        // // mouses over the marker.
+        // //var highlightedIcon = makeMarkerIcon('ed8358');
+        // var clickedIcon = makeMarkerIcon('ffffff');
 
-        // Create a "highlighted location" marker color for when the user
-        // mouses over the marker.
-        //var highlightedIcon = makeMarkerIcon('ed8358');
-
-        var clickedIcon = makeMarkerIcon('ffffff');
-
-        for (var i = 0; i < locations.length; i++) {
+        // Loop over the observable locations array
+        for (var i = 0; i < vm.locations().length; i++) {
+          console.log(vm.locations()[i].location);
           // Get the position from the location array.
-          var position = locations[i].location;
-          var title = locations[i].title;
+          var position = vm.locations()[i].location;
+          var title = vm.locations()[i].title;
           // Create a marker per location, and put into markers array.
           var marker = new google.maps.Marker({
             position: position,
@@ -201,18 +200,27 @@ ko.applyBindings(new ViewModel())
             icon: defaultIcon,
             id: i
           });
-          // Push the marker to our array of markers.
-          markers.push(marker);
+
+          // Store the marker inside the observable locations array (creates a new marker property in array items)
+          vm.locations()[i].marker = marker;
+          // Push the marker to our array of markers (no longer need this??)
+          // markers.push(marker);
 
           // Create an onclick event to open the large infowindow at each marker.
-          marker.addListener('click', function() {
-            //set all markers to default color (previously selected marker does not stay white)
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].setIcon(defaultIcon); 
-            };
+          // marker.addListener('click', toggleBounce);
+          marker.addListener('click', toggleWindow);
+
+          
+          function toggleWindow() {
+            console.log(this); // THESE THIS'S ARE NOT WORKING FOR THE VIEWMODEL (ONLY WORKING FOR MAP MAPRKER CLICKS)
+            //REPLACING THESE THIS'S WITH "MARKER" MAKES A POPUP WINDOW SHOW UP, BUT ONLY ON ONE 
             populateInfoWindow(this, largeInfowindow);
-            //setTimeout(this.setIcon(highlightedIcon), 3000);
-          });
+          }
+
+          // function toggleBounce() {
+          //   bounce(this);
+          //   console.log(this);
+          // }
 
           // marker.addListener('click', function() {
           //   this.setIcon(clickedIcon);
@@ -232,27 +240,13 @@ ko.applyBindings(new ViewModel())
           // });
         }
 
-        function populateInfoWindow(marker, infowindow) {
-        // Check to make sure the infowindow is not already opened on this marker.
-        if (infowindow.marker != marker) {
-          infowindow.marker = marker;
-          infowindow.setContent('<div>' + marker.title + '</div>');
-          infowindow.open(map, marker);
-          marker.setIcon(clickedIcon);
-          // Make sure the marker property is cleared if the infowindow is closed.
-          infowindow.addListener('closeclick', function() {
-            marker.setIcon(defaultIcon);
-            infowindow.marker = null;
-          });
-        }
-      }
 
 
-        //var bounds = new google.maps.LatLngBounds();
-        // Extend the boundaries of the map for each marker and 
-        //display the marker
-        for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(map);
+
+        
+        // Loop through observable locations array and display markers
+        for (var i = 0; i < vm.locations().length; i++) {
+          vm.locations()[i].marker.setMap(map);
           //bounds.extend(markers[i].position);
         }
         //map.fitBounds(bounds);
@@ -271,7 +265,36 @@ ko.applyBindings(new ViewModel())
 				// 	infowindow.open(map, marker);
 				// });
 
-			} /// end initMap
+
+        function populateInfoWindow(marker, infowindow) {
+          // if it's already animated, clear animation and close the infowindow
+          if (marker.getAnimation() !== null) {
+              marker.setAnimation(null);
+              console.log("stop");
+              //infowindow.marker = null; // (may need to keep this?)
+              infowindow.close();
+            } else {
+              console.log("start");
+              // otherwise, start bounce animation and end after 670 ms
+              marker.setAnimation(google.maps.Animation.BOUNCE);
+              setTimeout(function() {marker.setAnimation(null);}, 720);
+              // and open infowindow
+              infowindow.marker = marker;
+              infowindow.setContent('<div>' + marker.title + '</div>');
+              infowindow.open(map, marker);
+            }
+        }
+
+        // function bounce(marker) {
+        //   // Check to make sure the infowindow is not already opened on this marker.
+        //   if (marker.getAnimation() !== null) {
+        //         marker.setAnimation(null);
+        //       } else {
+        //         marker.setAnimation(google.maps.Animation.BOUNCE);
+        //       }
+        // }
+
+      } ////// end initMap
 
       // This function takes in a COLOR, and then creates a new marker
       // icon of that color. The icon will be 21 px wide by 34 high, have an origin
