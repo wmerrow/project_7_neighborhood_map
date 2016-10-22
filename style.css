@@ -6,7 +6,8 @@ html, body {
 }
 
 #map {
-	height: 90%;
+	height: 100%;
+      margin-left: 40%;
 }
 
 .sidebar {
@@ -14,8 +15,6 @@ html, body {
 	width: 40%;
 	position: absolute;
 	background-color: #ffffff;
-	opacity: .9;
-	z-index: 1;
 }
 
 h2 {
