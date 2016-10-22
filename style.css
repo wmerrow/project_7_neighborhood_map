@@ -11,7 +11,7 @@ html, body {
 
 .sidebar {
 	height: 100%;
-	width: 35%;
+	width: 40%;
 	position: absolute;
 	background-color: #ffffff;
 	opacity: .9;
@@ -21,6 +21,13 @@ html, body {
 h2 {
       font-size: 16px;
       text-align: center;
+}
+
+a {
+      font-size: 8px;
+      position: absolute;
+      left: 10px;
+      top: 300px;
 }
 
 button, select {

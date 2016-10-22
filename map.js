@@ -48,13 +48,6 @@ function initMap() {
     // property to store the selected option (bound to select menu through event change binding)
     self.selectedOption = ko.observable(self.filterOptions()[0]); // default value is item 0 (All)
 
-    //self.currentFilter = ko.observable(); // property to store the current filter
-
-    // sets current filter 
-    // self.filter = function (burrito) {
-    //     self.currentFilter(burrito);
-    // }
-
     // When user changes filter menu selection, set filter to current menuValue 
     // and filter (update) the markers displayed on the map 
     self.onChange = function() {
@@ -218,62 +211,71 @@ function initMap() {
 
           }
 
-          //Default display of markers - loop through observable locations array and display markers
+          //Initial display of markers - loop through observable locations array and display all markers
           for (var i = 0; i < vm.locations().length; i++) {
             vm.locations()[i].marker.setMap(map);
           }
 
 }
 
-
+// open an infowindow and animate marker
 function populateInfoWindow(locationObj, infowindow) {
+  
   var marker = locationObj.marker;
-  // if it's already animated, clear animation and close the infowindow
-  if (marker.getAnimation() !== null) {
-      marker.setAnimation(null);
-      //infowindow.marker = null; // (may need to keep this?)
-      infowindow.close();
-    } else {
-      // otherwise, start bounce animation and end after 670 ms
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      setTimeout(function() {marker.setAnimation(null);}, 720);
-      // and open infowindow
-      infowindow.marker = marker;
-      infowindow.setContent('<div>Loading...</div>');
-      infowindow.open(map, marker);
-    }
+  
+  // bounce once (bounce for 720 ms)
+  marker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(function() {marker.setAnimation(null);}, 720);
+  // and open infowindow
+  infowindow.marker = marker;
+  infowindow.setContent('<div>Loading...</div>'); // content to appear until API data is populated
+  infowindow.open(map, marker);
 
   // If this data has not yet been retrieved...
   if(!locationObj.apiResponse) {
-    $.ajax('https://api.openaq.org/v1/locations', {
-       data: { coordinates: locationObj.location.lat+','+locationObj.location.lng, radius: 5000, limit: 1 },
+    $.ajax('https://api.darksky.net/forecast/ad14b62b4763855039f02f4e22ea07dd/'+locationObj.location.lat+','+locationObj.location.lng, {
+       dataType: "jsonp",
+       // if success, store the result on locationObj and populate the info box
        success: function(result) {
-        locationObj.apiResponse = result.results; /// MAY NEED TO CHANGE .RESULTS??
+        locationObj.apiResponse = result;
         populateInfoBox(locationObj, infowindow);
        },
+       // if failure, set error to true and populate the info box (with error message)
        error: function(err) {
         locationObj.apiError = true;
         populateInfoBox(locationObj, infowindow);
        }
     });
   }
-  // Otherwise, populate box with the cached data
+  // Otherwise (if data has been retrieved) populate box with the cached data
   else {
     populateInfoBox(locationObj, infowindow);
   }
 
-} /// end populateinfoWindow
+}
 
+// populate the info box with eatery name (or error message)
 function populateInfoBox(locationObj, infowindow) {
   var marker = locationObj.marker;
-  if(locationObj.apiResponse && locationObj.apiResponse.length > 0) {
-    var name = locationObj.name;
-    //console.log(locationObj.apiResponse);
-    var apiInfo = locationObj.apiResponse[0].city;  ///MAY NEEED TO CHANGE FOR DIFFERENT API
+  var name = locationObj.name; // name of eatery (from location data)
+  if(locationObj.apiResponse) {
+    var weatherTemp = locationObj.apiResponse.currently.apparentTemperature; // temperature
+    var weatherSummary = locationObj.apiResponse.currently.summary; // weather summary
+    // set infowindow text content to eatery name and weather info
+    infowindow.setContent(
+    '<div>' + '<strong>' + name + '</strong>' + '</div>' + 
+    '<div>' + weatherTemp + " degrees" + '</div>' + 
+    '<div>' + weatherSummary + '</div>'
+    );
   }
   else if(locationObj.apiError) {
-    var content = 'Error retrieving content';
+    // set infowindow text content to eatery name and weather info
+    infowindow.setContent(
+    '<div>' + '<strong>' + name + '</strong>' + '</div>' + 
+    // message to display on API error
+    '<div>' + '<em>' + "Error retrieving weather information" + '</em>' + '</div>'
+    );
   }
-  infowindow.setContent('<div>' + name + '</div>' + '<div>' + apiInfo + '</div>');
+
 }
 
