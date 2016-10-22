@@ -1,44 +1,31 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<!-- <div id="sidebarPH"> -->
-
-<!-- 			<ul class="sidebar-text" data-bind="foreach: locationsTEST">
-				<li>test item</li>
-			</ul> -->
 		<div class="sidebar">
+			<h2 class="sidebar-text">Local Eateries</h2>
 
-			<h2 class="sidebar-text">The Neighborhood</h2>
-				<!-- run filter functions on click -->
-				<button data-bind="click: function() { filter('1') }">Burritos</button>
-				<button data-bind="click: function() { filter('0') }">Non-burritos</button>
-				<button data-bind="click: function() { filter('') }">All</button>
+			<select data-bind="options: filterOptions, optionsText: 'menuLabel', value: selectedOption, event: {change: onChange}">
+			</select>
 
-<!-- 			<select class="sidebar-text">
-				<option value="1" data-bind="select: function() { filter('1') }">Filter to 1s</option>
-				<option value="2" data-bind="select: function() { filter('0') }">Filter to 0s</option>
-			</select> -->
-
-			<div data-bind="foreach: filterLocations">
+			<div data-bind="foreach: filteredLocations">
 			    <div class="row">
-			        <button class="col-md-2" data-bind="text: name, click: $parent.listClick"></button>
-			        <button class="col-md-2" data-bind="text: burrito"></button>
+			        <button data-bind="text: name, click: $parent.listClick"></button>
 				</div>
 			</div>
-
 		</div>
 
 		<div id="map"></div>
 
+		<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
 		<script async defer 
 			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPIpboQQlIRw5XX6lJkJ3FBl5UeU6HMMY&v=3&callback=initMap">
 		</script>
 		<script type='text/javascript' src='knockout-3.4.0.js'></script>
 		<script src="map.js"></script>
-
 
 	</body>
 </html>
