@@ -279,3 +279,8 @@ function populateInfoBox(locationObj, infowindow) {
 
 }
 
+function mapError() {
+  $(".sidebar").append("<p class='error-text'><em>Error loading map</em></p>");
+}
+
+
